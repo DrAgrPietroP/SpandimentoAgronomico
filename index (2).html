@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spandimento Agronomico Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --gd:#1a3a1f;--gm:#2d5c35;--gs:#4a8c55;--gp:#e8f5ea;--gx:#f4faf5;
+  --am:#c47a1e;--ap:#fdf3e3;
+  --bl:#1e5ca4;--bp:#e8f0fa;
+  --pu:#6d3fa0;--pp:#f0e8fa;
+  --sand:#f7f4ef;--ink:#1c2319;--inkm:#3d4a3a;--inkl:#6b7a67;
+  --bdr:#d4e0d0;--white:#fff;
+  --rsm:6px;--rmd:10px;--rlg:16px;--rxl:22px;
+  --sh:0 2px 12px rgba(26,58,31,.08);--shl:0 8px 32px rgba(26,58,31,.13);
+  --pro:#6d3fa0;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* HEADER */
+header{background:var(--gd);padding:1.25rem 1.25rem 1.1rem;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.22)}
+.hinner{max-width:980px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:26px;line-height:1}
+.logo-text h1{font-family:'DM Serif Display',serif;font-size:clamp(16px,3.5vw,22px);color:#fff;font-weight:400;line-height:1.1}
+.logo-text p{font-size:10px;color:rgba(255,255,255,.5);font-weight:300;margin-top:2px;letter-spacing:.04em}
+.hright{display:flex;align-items:center;gap:8px}
+.reg-badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);font-size:11px;font-weight:500;padding:4px 11px;border-radius:20px;white-space:nowrap}
+.pro-badge{background:linear-gradient(135deg,#8b5cf6,#6d3fa0);color:#fff;font-size:11px;font-weight:600;padding:4px 11px;border-radius:20px;letter-spacing:.04em;display:none}
+.pro-badge.visible{display:block}
+
+/* TABS */
+.tabs-wrap{background:var(--white);border-bottom:1px solid var(--bdr);position:sticky;top:64px;z-index:90}
+.tabs{max-width:980px;margin:0 auto;display:flex;padding:0 1rem}
+.tab{font-size:13px;font-weight:500;color:var(--inkl);padding:11px 16px;border-bottom:2px solid transparent;cursor:pointer;transition:color .15s,border-color .15s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--gm);border-bottom-color:var(--gm)}
+.tab .lock{font-size:10px;opacity:.7}
+
+/* MAIN */
+main{max-width:980px;margin:0 auto;padding:1.5rem 1rem 3rem}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* SECTION */
+.sec-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gs);margin-bottom:.6rem;margin-top:1.75rem;display:flex;align-items:center;gap:8px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.sec-label:first-of-type{margin-top:0}
+
+/* SETTINGS */
+.settings-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.settings-row{grid-template-columns:1fr}}
+.scard{background:var(--white);border:1px solid var(--bdr);border-radius:var(--rmd);padding:12px 14px;box-shadow:var(--sh)}
+.scard label{font-size:11px;font-weight:600;color:var(--inkl);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:7px}
+select,input[type=text]{width:100%;background:var(--sand);border:1px solid var(--bdr);border-radius:var(--rsm);padding:8px 10px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink)}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7a67' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;cursor:pointer}
+select:focus,input:focus{outline:2px solid var(--gs);outline-offset:1px}
+
+/* ANIMALS */
+.animals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:8px}
+@media(max-width:400px){.animals-grid{grid-template-columns:1fr 1fr}}
+.acard{background:var(--white);border:1px solid var(--bdr);border-radius:var(--rmd);padding:11px 12px;box-shadow:var(--sh);transition:border-color .15s,box-shadow .15s}
+.acard.active{border-color:var(--gs);box-shadow:0 2px 12px rgba(74,140,85,.15)}
+.alabel{font-size:13px;font-weight:500;color:var(--inkm);display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.ainput-row{display:flex;align-items:center;gap:6px}
+.ainput-row input[type=number]{flex:1;min-width:0;background:var(--sand);border:1px solid var(--bdr);border-radius:var(--rsm);padding:7px 9px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--ink);font-weight:500;-moz-appearance:textfield}
+.ainput-row input[type=number]::-webkit-outer-spin-button,
+.ainput-row input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+.unt{font-size:11px;color:var(--inkl);white-space:nowrap}
+.nbadge{font-size:10px;font-weight:500;color:var(--bl);background:var(--bp);border-radius:4px;padding:2px 7px;margin-top:6px;display:inline-block}
+
+/* ALERT */
+.alert{border-radius:var(--rmd);padding:10px 14px;font-size:13px;margin-bottom:12px;display:none}
+.alert.visible{display:block}
+.awarn{background:var(--ap);color:#7a4b0a;border:1px solid #f0c97a}
+.aok{background:var(--gp);color:var(--gd);border:1px solid #b5d9bb}
+
+/* RESULTS */
+.results-box{background:var(--white);border:1px solid var(--bdr);border-radius:var(--rlg);padding:1.25rem;box-shadow:var(--shl)}
+.empty-state{text-align:center;padding:2rem 1rem;color:var(--inkl);font-size:14px}
+.empty-state .big{font-size:36px;margin-bottom:.5rem}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
+@media(max-width:600px){.metrics{grid-template-columns:1fr 1fr}}
+.met{background:var(--sand);border-radius:var(--rmd);padding:11px 12px;border:1px solid var(--bdr)}
+.met-lbl{font-size:10px;font-weight:600;color:var(--inkl);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.met-val{font-size:20px;font-weight:600;line-height:1.1;color:var(--ink)}
+.met-val.cbl{color:var(--bl)}.met-val.cgr{color:var(--gm)}.met-unit{font-size:11px;font-weight:400;color:var(--inkl);margin-left:2px}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+@media(max-width:540px){.calc-grid{grid-template-columns:1fr}}
+.calc-col{border-radius:var(--rmd);padding:12px 14px;border:1px solid}
+.c170{background:var(--bp);border-color:#b8d0f0}.c340{background:var(--gp);border-color:#b5d9bb}
+.calc-col-title{font-size:12px;font-weight:600;margin-bottom:8px}
+.c170 .calc-col-title{color:var(--bl)}.c340 .calc-col-title{color:var(--gm)}
+.cline{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;color:var(--inkm)}
+.cline span:last-child{font-weight:500;color:var(--ink)}
+.cline.total{border-top:1px solid rgba(0,0,0,.08);margin-top:5px;padding-top:6px;font-weight:600}
+.c170 .cline.total span{color:var(--bl)}.c340 .cline.total span{color:var(--gm)}
+.calc-note{font-size:11px;color:var(--inkl);margin-top:6px;line-height:1.4}
+.divider{border:none;border-top:1px solid var(--bdr);margin:.75rem 0}
+.bd-title{font-size:11px;font-weight:600;color:var(--inkl);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.bd-table{width:100%;border-collapse:collapse}
+.bd-table th{font-size:10px;font-weight:600;color:var(--inkl);text-transform:uppercase;letter-spacing:.05em;padding:4px 8px;text-align:left;border-bottom:1px solid var(--bdr)}
+.bd-table th:not(:first-child){text-align:right}
+.bd-table td{font-size:13px;padding:5px 8px;border-bottom:1px solid var(--gx);color:var(--inkm)}
+.bd-table td:not(:first-child){text-align:right;font-weight:500;color:var(--ink)}
+.bd-table tr:last-child td{border-bottom:none}
+.bd-table tfoot td{font-weight:600;color:var(--ink);border-top:1px solid var(--bdr);padding-top:7px}
+.source-note{font-size:11px;color:var(--inkl);line-height:1.5;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--bdr)}
+
+/* PRO GATE */
+.pro-gate{background:linear-gradient(135deg,#f8f4ff 0%,#ede8fa 100%);border:1.5px solid #c4b0ee;border-radius:var(--rlg);padding:2rem 1.5rem;text-align:center;position:relative;overflow:hidden}
+.pro-gate::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:radial-gradient(circle,rgba(109,63,160,.12),transparent 70%);pointer-events:none}
+.pro-gate-icon{font-size:36px;margin-bottom:.75rem}
+.pro-gate h3{font-family:'DM Serif Display',serif;font-size:20px;font-weight:400;color:#3d1a6e;margin-bottom:.5rem}
+.pro-gate p{font-size:13px;color:#6b5a8a;max-width:340px;margin:0 auto .75rem;line-height:1.5}
+.pro-features{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:1.25rem}
+.pro-feat{font-size:11px;font-weight:500;color:#5a3d8a;background:rgba(109,63,160,.1);border-radius:20px;padding:4px 12px;border:1px solid rgba(109,63,160,.2)}
+.btn-unlock{background:linear-gradient(135deg,#8b5cf6,#6d3fa0);color:#fff;border:none;border-radius:var(--rmd);padding:11px 28px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 16px rgba(109,63,160,.3);transition:transform .15s,box-shadow .15s}
+.btn-unlock:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(109,63,160,.4)}
+.btn-unlock:active{transform:translateY(0)}
+.input-code-row{display:flex;gap:8px;max-width:320px;margin:1rem auto 0;align-items:center}
+.input-code-row input{flex:1;background:#fff;border:1px solid #c4b0ee;border-radius:var(--rsm);padding:9px 12px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink)}
+.input-code-row input:focus{outline:2px solid var(--pu);outline-offset:1px}
+.btn-apply{background:var(--pu);color:#fff;border:none;border-radius:var(--rsm);padding:9px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap}
+.code-err{font-size:12px;color:#c0392b;margin-top:6px;display:none}
+.code-err.visible{display:block}
+
+/* STOCCAGGIO */
+.stocc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+@media(max-width:540px){.stocc-grid{grid-template-columns:1fr}}
+.stocc-card{background:var(--white);border:1px solid var(--bdr);border-radius:var(--rmd);padding:14px;box-shadow:var(--sh)}
+.stocc-card h4{font-size:13px;font-weight:600;color:var(--inkm);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.stocc-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--gx);color:var(--inkm)}
+.stocc-row:last-child{border-bottom:none;font-weight:600;color:var(--ink);padding-top:6px}
+.stocc-row span:last-child{font-weight:500;color:var(--ink)}
+.stocc-info{font-size:11px;color:var(--inkl);margin-top:8px;line-height:1.4}
+.stocc-summary{background:var(--gp);border:1px solid #b5d9bb;border-radius:var(--rmd);padding:12px 14px;margin-top:10px}
+.stocc-summary p{font-size:13px;color:var(--gd);font-weight:500}
+.stocc-summary .ssub{font-size:11px;color:var(--gs);font-weight:400;margin-top:2px}
+
+/* STORICO */
+.history-empty{text-align:center;padding:2rem;color:var(--inkl);font-size:13px}
+.history-list{display:flex;flex-direction:column;gap:8px}
+.hist-card{background:var(--white);border:1px solid var(--bdr);border-radius:var(--rmd);padding:12px 14px;box-shadow:var(--sh);cursor:pointer;transition:border-color .15s}
+.hist-card:hover{border-color:var(--gs)}
+.hist-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.hist-name{font-size:14px;font-weight:500;color:var(--ink)}
+.hist-date{font-size:11px;color:var(--inkl);white-space:nowrap}
+.hist-meta{font-size:12px;color:var(--inkm);margin-top:4px}
+.hist-values{display:flex;gap:12px;margin-top:6px;flex-wrap:wrap}
+.hist-val{font-size:12px;font-weight:600}
+.hist-val.hbl{color:var(--bl)}.hist-val.hgr{color:var(--gm)}
+.hist-actions{display:flex;gap:6px;margin-top:8px}
+.btn-sm{font-size:11px;font-family:'DM Sans',sans-serif;border-radius:var(--rsm);padding:4px 10px;cursor:pointer;border:1px solid;transition:background .15s}
+.btn-load{color:var(--gm);border-color:#b5d9bb;background:var(--gp)}.btn-load:hover{background:#d5edda}
+.btn-del{color:#c0392b;border-color:#f5c6c6;background:#fff5f5}.btn-del:hover{background:#fee}
+
+/* SAVE SECTION */
+.save-row{display:flex;gap:8px;margin-top:1rem;align-items:center;flex-wrap:wrap}
+.save-row input{flex:1;min-width:140px}
+.btn-save{background:var(--gm);color:#fff;border:none;border-radius:var(--rsm);padding:9px 18px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .15s}
+.btn-save:hover{background:var(--gd)}
+.btn-pdf{background:var(--bl);color:#fff;border:none;border-radius:var(--rsm);padding:9px 18px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:6px}
+.btn-pdf:hover{background:#174d8a}
+
+/* ACTIONS */
+.actions-row{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;flex-wrap:wrap;gap:8px}
+.btn-reset{font-size:12px;font-family:'DM Sans',sans-serif;color:var(--inkl);background:transparent;border:1px solid var(--bdr);border-radius:var(--rsm);padding:6px 14px;cursor:pointer;transition:background .15s}
+.btn-reset:hover{background:var(--sand)}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--gd);color:#fff;font-size:13px;font-weight:500;padding:10px 18px;border-radius:var(--rmd);box-shadow:0 4px 20px rgba(0,0,0,.2);z-index:999;transform:translateY(20px);opacity:0;transition:transform .25s,opacity .25s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:var(--rlg);padding:1.5rem;max-width:400px;width:100%;box-shadow:0 16px 64px rgba(0,0,0,.2)}
+.modal h3{font-family:'DM Serif Display',serif;font-size:20px;font-weight:400;margin-bottom:.5rem}
+.modal p{font-size:13px;color:var(--inkm);margin-bottom:1rem;line-height:1.5}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+.btn-cancel{font-size:13px;font-family:'DM Sans',sans-serif;color:var(--inkl);background:transparent;border:1px solid var(--bdr);border-radius:var(--rsm);padding:8px 16px;cursor:pointer}
+.btn-confirm{font-size:13px;font-family:'DM Sans',sans-serif;color:#fff;background:#c0392b;border:none;border-radius:var(--rsm);padding:8px 16px;cursor:pointer;font-weight:600}
+
+footer{text-align:center;padding:1.5rem 1rem;font-size:11px;color:var(--inkl);border-top:1px solid var(--bdr);max-width:980px;margin:0 auto}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.results-box{animation:fadeUp .3s ease both}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hinner">
+    <div class="logo">
+      <span class="logo-icon">🌾</span>
+      <div class="logo-text">
+        <h1>Spandimento Agronomico</h1>
+        <p>Calcolo ettari · Direttiva Nitrati 91/676/CEE · D.M. 25/02/2016</p>
+      </div>
+    </div>
+    <div class="hright">
+      <div class="reg-badge" id="reg-badge">Lombardia</div>
+      <div class="pro-badge" id="pro-badge">⭐ PRO</div>
+    </div>
+  </div>
+</header>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('calcolo',this)">📊 Calcolo</div>
+    <div class="tab" onclick="switchTab('stoccaggio',this)" id="tab-stocc">🪣 Stoccaggio <span class="lock" id="lock-stocc">🔒</span></div>
+    <div class="tab" onclick="switchTab('storico',this)" id="tab-hist">📁 Storico <span class="lock" id="lock-hist">🔒</span></div>
+  </div>
+</div>
+
+<main>
+
+<!-- TAB CALCOLO -->
+<div class="tab-panel active" id="panel-calcolo">
+
+  <div class="sec-label">Parametri generali</div>
+  <div class="settings-row">
+    <div class="scard">
+      <label>Regione</label>
+      <select id="regione" onchange="onRegChange()">
+        <option value="lombardia">Lombardia</option>
+        <option value="veneto">Veneto</option>
+        <option value="piemonte">Piemonte</option>
+        <option value="emilia">Emilia-Romagna</option>
+      </select>
+    </div>
+    <div class="scard">
+      <label>Zona di allevamento</label>
+      <select id="zona" onchange="calc()">
+        <option value="ord">Zona ordinaria</option>
+        <option value="vul">Zona vulnerabile ai nitrati</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="sec-label">Capi allevati</div>
+  <div class="animals-grid" id="animals-grid"></div>
+
+  <div class="alert awarn" id="alert-box"></div>
+
+  <div class="sec-label">Risultati</div>
+  <div class="results-box" id="results">
+    <div class="empty-state"><div class="big">📋</div>Inserire i capi per visualizzare il calcolo.</div>
+  </div>
+
+  <div class="actions-row">
+    <button class="btn-reset" onclick="resetAll()">↺ Azzera tutto</button>
+    <button class="btn-pdf" id="btn-pdf" onclick="exportPDF()" style="display:none">📄 Esporta PDF</button>
+  </div>
+
+  <!-- SAVE PRO -->
+  <div id="save-section" style="display:none">
+    <div class="sec-label">Salva calcolo</div>
+    <div class="save-row">
+      <input type="text" id="save-name" placeholder="Nome allevamento (es. Az. Rossi)">
+      <button class="btn-save" onclick="saveCalc()">💾 Salva</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- TAB STOCCAGGIO -->
+<div class="tab-panel" id="panel-stoccaggio">
+  <div id="stocc-gate">
+    <div class="pro-gate">
+      <div class="pro-gate-icon">🪣</div>
+      <h3>Calcolo Stoccaggio — Pro</h3>
+      <p>Volume vasche liquame e dimensionamento platee letame secondo la normativa regionale.</p>
+      <div class="pro-features">
+        <span class="pro-feat">Volume vasca liquame</span>
+        <span class="pro-feat">Platea letame</span>
+        <span class="pro-feat">Giorni di autonomia</span>
+        <span class="pro-feat">Verifica normativa</span>
+      </div>
+      <button class="btn-unlock" onclick="showUnlockModal()">🔓 Attiva Pro</button>
+      <div class="input-code-row">
+        <input type="text" id="code-stocc" placeholder="Hai un codice?" maxlength="20">
+        <button class="btn-apply" onclick="applyCode('code-stocc')">Applica</button>
+      </div>
+      <div class="code-err" id="err-stocc">Codice non valido.</div>
+    </div>
+  </div>
+  <div id="stocc-content" style="display:none">
+    <div id="stocc-results">
+      <div class="empty-state"><div class="big">🪣</div>Inserire i capi nel tab Calcolo per visualizzare lo stoccaggio.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB STORICO -->
+<div class="tab-panel" id="panel-storico">
+  <div id="hist-gate">
+    <div class="pro-gate">
+      <div class="pro-gate-icon">📁</div>
+      <h3>Storico Calcoli — Pro</h3>
+      <p>Salva e confronta i calcoli nel tempo. Ricarica un allevamento salvato in un click.</p>
+      <div class="pro-features">
+        <span class="pro-feat">Salvataggio allevamenti</span>
+        <span class="pro-feat">Confronto storico</span>
+        <span class="pro-feat">Ricarica dati</span>
+        <span class="pro-feat">Eliminazione selettiva</span>
+      </div>
+      <button class="btn-unlock" onclick="showUnlockModal()">🔓 Attiva Pro</button>
+      <div class="input-code-row">
+        <input type="text" id="code-hist" placeholder="Hai un codice?" maxlength="20">
+        <button class="btn-apply" onclick="applyCode('code-hist')">Applica</button>
+      </div>
+      <div class="code-err" id="err-hist">Codice non valido.</div>
+    </div>
+  </div>
+  <div id="hist-content" style="display:none">
+    <div class="sec-label">Calcoli salvati</div>
+    <div id="history-list"></div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  Calcolatore a uso indicativo · Verificare sempre con il Piano di Utilizzazione Agronomica (PUA) e con il proprio tecnico agronomo<br>
+  D.M. 25/02/2016 · Progetto interregionale "Bilancio dell'azoto negli allevamenti" (L. 499/1999)
+</footer>
+
+<!-- MODAL UNLOCK -->
+<div class="modal-overlay" id="modal-unlock">
+  <div class="modal">
+    <h3>Attiva la versione Pro</h3>
+    <p>Inserisci il codice di attivazione ricevuto dopo l'acquisto per sbloccare tutte le funzioni Pro.</p>
+    <input type="text" id="modal-code" placeholder="CODICE-ATTIVAZIONE" maxlength="20" style="margin-bottom:.5rem">
+    <div class="code-err" id="modal-err">Codice non valido. Riprova.</div>
+    <div class="modal-actions" style="margin-top:1rem">
+      <button class="btn-cancel" onclick="closeModal()">Annulla</button>
+      <button class="btn-confirm" style="background:var(--pu)" onclick="applyCode('modal-code')">Attiva</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const ANIMALS = [
+  {id:"vacche_latte",   label:"Vacche da latte",      icon:"🐄", liq:1, base:{lombardia:85,  veneto:91,  piemonte:80,  emilia:88},  mc_capo:25},
+  {id:"vacche_carne",   label:"Bovini da carne",       icon:"🐂", liq:1, base:{lombardia:68,  veneto:70,  piemonte:65,  emilia:70},  mc_capo:15},
+  {id:"vitelli",        label:"Vitelli (< 6 mesi)",    icon:"🐮", liq:1, base:{lombardia:18,  veneto:19,  piemonte:17,  emilia:19},  mc_capo:5},
+  {id:"bov_rimonta",    label:"Bovini rimonta",         icon:"🐃", liq:1, base:{lombardia:36,  veneto:38,  piemonte:35,  emilia:37},  mc_capo:8},
+  {id:"vacche_nutrici", label:"Vacche nutrici",         icon:"🐄", liq:1, base:{lombardia:44,  veneto:44,  piemonte:44,  emilia:44},  mc_capo:12},
+  {id:"scrofe",         label:"Scrofe riproduttrici",   icon:"🐷", liq:1, base:{lombardia:15,  veneto:16,  piemonte:15,  emilia:16},  mc_capo:2.5},
+  {id:"suini_ingr",     label:"Suini da ingrasso",      icon:"🐖", liq:1, base:{lombardia:10,  veneto:10,  piemonte:9,   emilia:10},  mc_capo:1.5},
+  {id:"galline",        label:"Galline ovaiole",        icon:"🐓", liq:0, base:{lombardia:0.73,veneto:0.73,piemonte:0.73,emilia:0.73},kg_capo:0.06},
+  {id:"polli",          label:"Polli da carne",         icon:"🐔", liq:0, base:{lombardia:0.44,veneto:0.48,piemonte:0.44,emilia:0.46},kg_capo:0.04},
+  {id:"tacchini",       label:"Tacchini",               icon:"🦃", liq:0, base:{lombardia:1.3, veneto:1.4, piemonte:1.3, emilia:1.3}, kg_capo:0.10},
+  {id:"ovini",          label:"Ovini / Caprini",        icon:"🐑", liq:0, base:{lombardia:9,   veneto:9,   piemonte:9,   emilia:9},   kg_capo:0.55},
+  {id:"equini",         label:"Equini",                 icon:"🐴", liq:0, base:{lombardia:45,  veneto:45,  piemonte:45,  emilia:45},  kg_capo:3.5},
+  {id:"conigli",        label:"Conigli (fattrici)",     icon:"🐇", liq:0, base:{lombardia:1.8, veneto:1.8, piemonte:1.8, emilia:1.8}, kg_capo:0.12},
+];
+const FONTE={lombardia:"DGR Lombardia n. 2208/2011",veneto:"DGR Veneto n. 1150/2011",piemonte:"L.R. Piemonte n. 7/2011",emilia:"DGR Emilia-Romagna n. 1273/2011"};
+const REG_LABEL={lombardia:"Lombardia",veneto:"Veneto",piemonte:"Piemonte",emilia:"Emilia-Romagna"};
+// GIORNI STOCCAGGIO MINIMI PER REGIONE
+const STOCC_GIORNI={lombardia:180,veneto:120,piemonte:120,emilia:120};
+
+// PRO CODE — cambia questo valore con il tuo codice segreto
+const PRO_CODE = "AGRO2024PRO";
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let isPro = localStorage.getItem("spandimento_pro") === "1";
+let lastCalc = null;
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+function init(){
+  buildGrid();
+  onRegChange();
+  if(isPro) unlockPro(false);
+}
+
+// ─── TABS ────────────────────────────────────────────────────────────────────
+function switchTab(name, el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+// ─── GRID ────────────────────────────────────────────────────────────────────
+function buildGrid(){
+  const g=document.getElementById("animals-grid");
+  g.innerHTML=ANIMALS.map(a=>`
+    <div class="acard" id="card_${a.id}">
+      <div class="alabel">${a.icon} ${a.label}</div>
+      <div class="ainput-row">
+        <input type="number" inputmode="numeric" id="${a.id}" min="0" step="1" value="" placeholder="0" oninput="onInput('${a.id}')">
+        <span class="unt">capi</span>
+      </div>
+      <span class="nbadge" id="badge_${a.id}"></span>
+    </div>`).join("");
+}
+
+function onInput(id){
+  const v=parseFloat(document.getElementById(id).value)||0;
+  document.getElementById("card_"+id).classList.toggle("active",v>0);
+  calc();
+}
+
+function reg(){return document.getElementById("regione").value}
+function zona(){return document.getElementById("zona").value}
+function getNkg(a){return a.base[reg()]}
+
+function onRegChange(){
+  document.getElementById("reg-badge").textContent=REG_LABEL[reg()];
+  ANIMALS.forEach(a=>{
+    const b=document.getElementById("badge_"+a.id);
+    if(b) b.textContent=getNkg(a)+" kg N/capo/anno";
+  });
+  calc();
+}
+
+// ─── CALC ────────────────────────────────────────────────────────────────────
+function fmt(n){return n.toLocaleString("it-IT")}
+
+function calc(){
+  let totalN=0, bd=[];
+  ANIMALS.forEach(a=>{
+    const v=parseFloat(document.getElementById(a.id).value)||0;
+    if(v>0){const n=v*getNkg(a);totalN+=n;bd.push({...a,capi:v,n});}
+  });
+
+  lastCalc={totalN,bd,reg:reg(),zona:zona(),date:new Date().toISOString()};
+
+  const alertEl=document.getElementById("alert-box");
+  const pdfBtn=document.getElementById("btn-pdf");
+  const saveSection=document.getElementById("save-section");
+
+  if(totalN===0){
+    alertEl.classList.remove("visible");
+    document.getElementById("results").innerHTML=`<div class="empty-state"><div class="big">📋</div>Inserire i capi per visualizzare il calcolo.</div>`;
+    pdfBtn.style.display="none";
+    saveSection.style.display="none";
+    renderStoccaggio(null);
+    return;
+  }
+
+  const e170=totalN/170, e340=totalN/340;
+  const isVuln=zona()==="vul";
+
+  if(e170>1000){alertEl.classList.add("visible");alertEl.textContent="⚠ Superficie molto elevata (>1.000 ha al limite 170 kg N/ha). Valutare accordi con aziende terze o impianti di trattamento."}
+  else{alertEl.classList.remove("visible")}
+
+  if(isPro){pdfBtn.style.display="flex";saveSection.style.display="block";}
+
+  const bRows=bd.map(b=>`<tr><td>${b.icon} ${b.label}</td><td>${fmt(b.capi)}</td><td>${getNkg(b)}</td><td>${fmt(Math.round(b.n))}</td></tr>`).join("");
+
+  document.getElementById("results").innerHTML=`
+    <div class="metrics">
+      <div class="met"><div class="met-lbl">Azoto totale prodotto</div><div class="met-val">${fmt(Math.round(totalN))} <span class="met-unit">kg N/anno</span></div></div>
+      <div class="met"><div class="met-lbl">Limite standard</div><div class="met-val">170 <span class="met-unit">kg N/ha/anno</span></div></div>
+      <div class="met"><div class="met-lbl">Ettari a 170 kg N/ha</div><div class="met-val cbl">${e170.toFixed(1)} <span class="met-unit">ha</span></div></div>
+      <div class="met"><div class="met-lbl">Ettari a 340 kg N/ha</div><div class="met-val cgr">${e340.toFixed(1)} <span class="met-unit">ha</span></div></div>
+    </div>
+    <div class="calc-grid">
+      <div class="calc-col c170">
+        <div class="calc-col-title">Scenario A — Limite ordinario (170 kg N/ha)</div>
+        <div class="cline"><span>Azoto totale</span><span>${fmt(Math.round(totalN))} kg N/anno</span></div>
+        <div class="cline"><span>Limite</span><span>170 kg N/ha/anno</span></div>
+        <div class="cline"><span>Calcolo</span><span>${fmt(Math.round(totalN))} ÷ 170</span></div>
+        <div class="cline total"><span>Ettari necessari</span><span>${e170.toFixed(2)} ha</span></div>
+        <div class="calc-note">Applicabile a tutte le zone${isVuln?" (ordinarie e vulnerabili)":""}</div>
+      </div>
+      <div class="calc-col c340">
+        <div class="calc-col-title">Scenario B — Limite in deroga (340 kg N/ha)</div>
+        <div class="cline"><span>Azoto totale</span><span>${fmt(Math.round(totalN))} kg N/anno</span></div>
+        <div class="cline"><span>Limite</span><span>340 kg N/ha/anno</span></div>
+        <div class="cline"><span>Calcolo</span><span>${fmt(Math.round(totalN))} ÷ 340</span></div>
+        <div class="cline total"><span>Ettari necessari</span><span>${e340.toFixed(2)} ha</span></div>
+        <div class="calc-note">${isVuln?"Deroga richiede autorizzazione regionale specifica.":"Applicabile con PUA approvato e requisiti agro-ambientali."}</div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="bd-title">Contributo per specie</div>
+    <table class="bd-table">
+      <thead><tr><th>Specie</th><th>Capi</th><th>kg N/capo</th><th>kg N tot.</th></tr></thead>
+      <tbody>${bRows}</tbody>
+      <tfoot><tr><td colspan="3">Totale azoto prodotto</td><td>${fmt(Math.round(totalN))} kg N/anno</td></tr></tfoot>
+    </table>
+    <div class="source-note">📄 Fonte: ${FONTE[reg()]} · D.M. 25/02/2016. Valori indicativi — verificare con il PUA e con il tecnico agronomo.</div>
+  `;
+
+  renderStoccaggio(bd);
+}
+
+// ─── STOCCAGGIO ──────────────────────────────────────────────────────────────
+function renderStoccaggio(bd){
+  if(!isPro) return;
+  const el=document.getElementById("stocc-results");
+  if(!bd||bd.length===0){
+    el.innerHTML=`<div class="empty-state"><div class="big">🪣</div>Inserire i capi nel tab Calcolo per visualizzare lo stoccaggio.</div>`;
+    return;
+  }
+  const giorni=STOCC_GIORNI[reg()];
+  // LIQUAME (bovini, suini)
+  let mc_liquame=0;
+  bd.filter(b=>b.liq).forEach(b=>{mc_liquame+=b.capi*b.mc_capo*(giorni/365)});
+  // LETAME (avicoli, ovini, equini, conigli)
+  let kg_letame_giorno=0;
+  bd.filter(b=>!b.liq).forEach(b=>{kg_letame_giorno+=b.capi*(b.kg_capo||0)});
+  const t_letame=kg_letame_giorno*giorni/1000; // tonnellate
+  const m2_platea=t_letame>0?(t_letame*1000/800):0; // densità ~800 kg/m²
+
+  const liqRows = bd.filter(b=>b.liq).map(b=>`
+    <div class="stocc-row"><span>${b.icon} ${b.label} (${fmt(b.capi)} capi × ${b.mc_capo} m³/capo × ${giorni}gg/365)</span><span>${(b.capi*b.mc_capo*(giorni/365)).toFixed(1)} m³</span></div>`).join("");
+  const letRows = bd.filter(b=>!b.liq).map(b=>`
+    <div class="stocc-row"><span>${b.icon} ${b.label} (${fmt(b.capi)} capi × ${b.kg_capo} kg/gg × ${giorni}gg)</span><span>${(b.capi*(b.kg_capo||0)*giorni/1000).toFixed(1)} t</span></div>`).join("");
+
+  el.innerHTML=`
+    <div class="stocc-summary">
+      <p>🗓 Periodo minimo di stoccaggio per ${REG_LABEL[reg()]}: <strong>${giorni} giorni</strong></p>
+      <div class="ssub">Secondo la normativa regionale vigente</div>
+    </div>
+    <div class="stocc-grid" style="margin-top:1rem">
+      ${mc_liquame>0?`
+      <div class="stocc-card">
+        <h4>🌊 Vasca liquame</h4>
+        ${liqRows}
+        <div class="stocc-row"><span><strong>Volume minimo vasca</strong></span><span>${mc_liquame.toFixed(1)} m³</span></div>
+        <div class="stocc-info">Volume lordo indicativo. Aggiungere 15-20% per precipitazioni e diluizioni. Verificare con progettista abilitato.</div>
+      </div>`:""}
+      ${m2_platea>0?`
+      <div class="stocc-card">
+        <h4>🧱 Platea letame</h4>
+        ${letRows}
+        <div class="stocc-row"><span>Letame prodotto (${giorni} gg)</span><span>${t_letame.toFixed(1)} t</span></div>
+        <div class="stocc-row"><span><strong>Superficie platea minima</strong></span><span>${m2_platea.toFixed(0)} m²</span></div>
+        <div class="stocc-info">Densità letame stimata 800 kg/m². La platea deve essere impermeabile con cordolo e sistema di raccolta percolati.</div>
+      </div>`:""}
+    </div>
+    ${mc_liquame===0&&m2_platea===0?`<div class="empty-state"><div class="big">ℹ️</div>Nessun dato di stoccaggio disponibile per i capi inseriti.</div>`:""}
+    <div class="source-note">⚠ I volumi sono indicativi e calcolati sul periodo minimo regionale. Per il dimensionamento definitivo rivolgersi a un tecnico abilitato e verificare le norme locali vigenti.</div>
+  `;
+}
+
+// ─── PRO ─────────────────────────────────────────────────────────────────────
+function showUnlockModal(){document.getElementById("modal-unlock").classList.add("open")}
+function closeModal(){document.getElementById("modal-unlock").classList.remove("open");document.getElementById("modal-err").classList.remove("visible")}
+
+function applyCode(inputId){
+  const val=document.getElementById(inputId).value.trim().toUpperCase();
+  const errMap={"code-stocc":"err-stocc","code-hist":"err-hist","modal-code":"modal-err"};
+  const errId=errMap[inputId];
+  if(val===PRO_CODE){
+    localStorage.setItem("spandimento_pro","1");
+    isPro=true;
+    unlockPro(true);
+    closeModal();
+    showToast("✅ Versione Pro attivata!");
+  } else {
+    document.getElementById(errId).classList.add("visible");
+  }
+}
+
+function unlockPro(animate){
+  isPro=true;
+  // badge
+  document.getElementById("pro-badge").classList.add("visible");
+  // lock icons
+  document.getElementById("lock-stocc").style.display="none";
+  document.getElementById("lock-hist").style.display="none";
+  // gates
+  document.getElementById("stocc-gate").style.display="none";
+  document.getElementById("hist-gate").style.display="none";
+  document.getElementById("stocc-content").style.display="block";
+  document.getElementById("hist-content").style.display="block";
+  // save section
+  if(lastCalc&&lastCalc.totalN>0){
+    document.getElementById("save-section").style.display="block";
+    document.getElementById("btn-pdf").style.display="flex";
+  }
+  renderHistory();
+  if(lastCalc) renderStoccaggio(lastCalc.bd);
+}
+
+// ─── STORICO ─────────────────────────────────────────────────────────────────
+function getHistory(){
+  try{return JSON.parse(localStorage.getItem("spandimento_history")||"[]")}catch{return[]}
+}
+function saveHistory(arr){localStorage.setItem("spandimento_history",JSON.stringify(arr))}
+
+function saveCalc(){
+  const name=document.getElementById("save-name").value.trim();
+  if(!name){showToast("⚠ Inserire un nome allevamento");return}
+  if(!lastCalc||lastCalc.totalN===0){showToast("⚠ Nessun calcolo da salvare");return}
+  const arr=getHistory();
+  arr.unshift({...lastCalc,name,savedAt:new Date().toISOString()});
+  saveHistory(arr.slice(0,50));
+  document.getElementById("save-name").value="";
+  renderHistory();
+  showToast("💾 Calcolo salvato!");
+}
+
+function renderHistory(){
+  const el=document.getElementById("history-list");
+  if(!el) return;
+  const arr=getHistory();
+  if(arr.length===0){el.innerHTML=`<div class="history-empty">📂 Nessun calcolo salvato.<br>Esegui un calcolo e usa il pulsante "Salva".</div>`;return}
+  el.innerHTML=arr.map((h,i)=>`
+    <div class="hist-card">
+      <div class="hist-head">
+        <div class="hist-name">🏠 ${h.name}</div>
+        <div class="hist-date">${new Date(h.savedAt).toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric"})}</div>
+      </div>
+      <div class="hist-meta">${REG_LABEL[h.reg]||h.reg} · ${h.zona==="vul"?"Zona vulnerabile":"Zona ordinaria"} · ${h.bd.length} specie</div>
+      <div class="hist-values">
+        <span class="hist-val">Azoto: ${fmt(Math.round(h.totalN))} kg N/anno</span>
+        <span class="hist-val hbl">▸ ${(h.totalN/170).toFixed(1)} ha (170)</span>
+        <span class="hist-val hgr">▸ ${(h.totalN/340).toFixed(1)} ha (340)</span>
+      </div>
+      <div class="hist-actions">
+        <button class="btn-sm btn-load" onclick="loadCalc(${i})">📂 Carica</button>
+        <button class="btn-sm btn-del" onclick="deleteCalc(${i})">🗑 Elimina</button>
+      </div>
+    </div>`).join("");
+}
+
+function loadCalc(i){
+  const arr=getHistory();
+  const h=arr[i];
+  if(!h) return;
+  // set region/zone
+  document.getElementById("regione").value=h.reg;
+  document.getElementById("zona").value=h.zona;
+  // reset all
+  ANIMALS.forEach(a=>{document.getElementById(a.id).value="";document.getElementById("card_"+a.id).classList.remove("active")});
+  // fill
+  h.bd.forEach(b=>{
+    const el=document.getElementById(b.id);
+    if(el){el.value=b.capi;document.getElementById("card_"+b.id).classList.add("active")}
+  });
+  onRegChange();
+  // switch to calc
+  const tabs=document.querySelectorAll('.tab');
+  switchTab('calcolo',tabs[0]);
+  showToast("📂 Calcolo caricato: "+h.name);
+}
+
+function deleteCalc(i){
+  const arr=getHistory();
+  arr.splice(i,1);
+  saveHistory(arr);
+  renderHistory();
+  showToast("🗑 Calcolo eliminato");
+}
+
+// ─── PDF ─────────────────────────────────────────────────────────────────────
+function exportPDF(){
+  if(!lastCalc||lastCalc.totalN===0){showToast("⚠ Nessun dato da esportare");return}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:"mm",format:"a4"});
+  const W=210,M=18,cw=W-M*2;
+  let y=20;
+
+  const green=[29,90,35], blue=[30,92,164], ink=[28,35,25], grey=[107,122,103];
+
+  // header bar
+  doc.setFillColor(...green);
+  doc.rect(0,0,W,14,"F");
+  doc.setTextColor(255,255,255);
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(11);
+  doc.text("🌾  Spandimento Agronomico — Riepilogo calcolo",M,9.5);
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(8);
+  doc.text("Direttiva Nitrati 91/676/CEE · D.M. 25/02/2016",W-M,9.5,{align:"right"});
+  y=22;
+
+  // date + region
+  doc.setTextColor(...grey);
+  doc.setFontSize(8);
+  doc.text("Data: "+new Date().toLocaleDateString("it-IT",{day:"2-digit",month:"long",year:"numeric"}),M,y);
+  doc.text("Regione: "+REG_LABEL[lastCalc.reg]+"  ·  "+( lastCalc.zona==="vul"?"Zona vulnerabile ai nitrati":"Zona ordinaria"),W-M,y,{align:"right"});
+  y+=8;
+
+  // results boxes
+  const boxW=(cw-6)/2, bh=18;
+  [[`Azoto totale prodotto`,`${fmt(Math.round(lastCalc.totalN))} kg N/anno`,green],
+   [`Limite standard`,`170 kg N/ha/anno`,blue],
+   [`Ettari a 170 kg N/ha`,`${(lastCalc.totalN/170).toFixed(2)} ha`,blue],
+   [`Ettari a 340 kg N/ha`,`${(lastCalc.totalN/340).toFixed(2)} ha`,green]
+  ].forEach(([lbl,val,col],i)=>{
+    const x=M+(i%2)*(boxW+6);
+    if(i%2===0&&i>0) y+=bh+4;
+    doc.setFillColor(245,248,245);
+    doc.setDrawColor(210,224,208);
+    doc.roundedRect(x,y,boxW,bh,2,2,"FD");
+    doc.setTextColor(...grey);doc.setFontSize(7);doc.setFont("helvetica","normal");
+    doc.text(lbl.toUpperCase(),x+5,y+6);
+    doc.setTextColor(...col);doc.setFontSize(12);doc.setFont("helvetica","bold");
+    doc.text(val,x+5,y+13);
+  });
+  y+=bh+10;
+
+  // section: calcolo dettaglio
+  doc.setFillColor(...green);doc.rect(M,y,cw,6,"F");
+  doc.setTextColor(255,255,255);doc.setFontSize(8);doc.setFont("helvetica","bold");
+  doc.text("DETTAGLIO CALCOLO",M+3,y+4.2);
+  y+=9;
+
+  const hw=(cw-5)/2;
+  // col A
+  doc.setFillColor(232,240,250);doc.setDrawColor(184,208,240);
+  doc.roundedRect(M,y,hw,38,2,2,"FD");
+  doc.setTextColor(...blue);doc.setFontSize(8);doc.setFont("helvetica","bold");
+  doc.text("Scenario A — Limite ordinario (170 kg N/ha)",M+4,y+6);
+  const linesA=[
+    ["Azoto totale prodotto",`${fmt(Math.round(lastCalc.totalN))} kg N/anno`],
+    ["Limite applicato","170 kg N/ha/anno"],
+    ["Calcolo",`${fmt(Math.round(lastCalc.totalN))} ÷ 170`],
+    ["Ettari necessari",`${(lastCalc.totalN/170).toFixed(2)} ha`],
+  ];
+  linesA.forEach(([k,v],i)=>{
+    doc.setTextColor(...ink);doc.setFontSize(8);doc.setFont("helvetica","normal");
+    doc.text(k,M+4,y+12+i*6);
+    doc.setFont("helvetica","bold");doc.text(v,M+hw-4,y+12+i*6,{align:"right"});
+  });
+
+  // col B
+  const bx=M+hw+5;
+  doc.setFillColor(232,245,234);doc.setDrawColor(181,217,187);
+  doc.roundedRect(bx,y,hw,38,2,2,"FD");
+  doc.setTextColor(...green);doc.setFontSize(8);doc.setFont("helvetica","bold");
+  doc.text("Scenario B — Limite in deroga (340 kg N/ha)",bx+4,y+6);
+  const linesB=[
+    ["Azoto totale prodotto",`${fmt(Math.round(lastCalc.totalN))} kg N/anno`],
+    ["Limite applicato","340 kg N/ha/anno"],
+    ["Calcolo",`${fmt(Math.round(lastCalc.totalN))} ÷ 340`],
+    ["Ettari necessari",`${(lastCalc.totalN/340).toFixed(2)} ha`],
+  ];
+  linesB.forEach(([k,v],i)=>{
+    doc.setTextColor(...ink);doc.setFontSize(8);doc.setFont("helvetica","normal");
+    doc.text(k,bx+4,y+12+i*6);
+    doc.setFont("helvetica","bold");doc.text(v,bx+hw-4,y+12+i*6,{align:"right"});
+  });
+  y+=44;
+
+  // section: contributo per specie
+  doc.setFillColor(...green);doc.rect(M,y,cw,6,"F");
+  doc.setTextColor(255,255,255);doc.setFontSize(8);doc.setFont("helvetica","bold");
+  doc.text("CONTRIBUTO PER SPECIE",M+3,y+4.2);
+  y+=8;
+  // table header
+  const cols=[["Specie",70],["Capi",20],["kg N/capo",25],["kg N totali",30]];
+  let cx=M;
+  doc.setFillColor(244,250,245);doc.setDrawColor(212,224,208);
+  doc.rect(M,y-1,cw,7,"FD");
+  cols.forEach(([h,w])=>{
+    doc.setTextColor(...grey);doc.setFontSize(7.5);doc.setFont("helvetica","bold");
+    doc.text(h,cx+2,y+4);cx+=w;
+  });
+  y+=8;
+  lastCalc.bd.forEach((b,i)=>{
+    if(i%2===0){doc.setFillColor(249,252,249);doc.rect(M,y-2,cw,6.5,"F")}
+    cx=M;
+    const row=[[b.label,70],[fmt(b.capi),20],[String(getNkg(b)),25],[fmt(Math.round(b.n)),30]];
+    row.forEach(([v,w])=>{
+      doc.setTextColor(...ink);doc.setFontSize(8);doc.setFont("helvetica","normal");
+      doc.text(v,cx+2,y+3);cx+=w;
+    });
+    y+=6.5;
+    if(y>270){doc.addPage();y=20}
+  });
+  // total row
+  doc.setFillColor(232,245,234);doc.rect(M,y-1,cw,7,"F");
+  doc.setTextColor(...green);doc.setFontSize(8);doc.setFont("helvetica","bold");
+  doc.text("Totale azoto prodotto",M+2,y+4);
+  doc.text(fmt(Math.round(lastCalc.totalN))+" kg N/anno",M+cw-2,y+4,{align:"right"});
+  y+=12;
+
+  // footer note
+  if(y>265) {doc.addPage();y=20;}
+  doc.setDrawColor(212,224,208);doc.line(M,y,W-M,y);y+=5;
+  doc.setTextColor(...grey);doc.setFontSize(7);doc.setFont("helvetica","italic");
+  doc.text("Valori indicativi calcolati su base "+FONTE[lastCalc.reg]+" · D.M. 25/02/2016.",M,y);y+=4;
+  doc.text("Verificare sempre con il Piano di Utilizzazione Agronomica (PUA) e con il proprio tecnico agronomo.",M,y);
+
+  // page number
+  doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(...grey);
+  doc.text("Generato il "+new Date().toLocaleDateString("it-IT"),W/2,292,{align:"center"});
+
+  const safeName=(lastCalc.name||"calcolo").replace(/[^a-z0-9]/gi,"_");
+  doc.save("spandimento_"+safeName+"_"+new Date().toISOString().slice(0,10)+".pdf");
+  showToast("📄 PDF esportato!");
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function resetAll(){
+  ANIMALS.forEach(a=>{
+    document.getElementById(a.id).value="";
+    document.getElementById("card_"+a.id).classList.remove("active");
+  });
+  document.getElementById("alert-box").classList.remove("visible");
+  document.getElementById("results").innerHTML=`<div class="empty-state"><div class="big">📋</div>Inserire i capi per visualizzare il calcolo.</div>`;
+  document.getElementById("btn-pdf").style.display="none";
+  document.getElementById("save-section").style.display="none";
+  lastCalc=null;
+  renderStoccaggio(null);
+}
+
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),2800);
+}
+
+// close modal on overlay click
+document.getElementById("modal-unlock").addEventListener("click",function(e){if(e.target===this)closeModal()});
+
+init();
+</script>
+</body>
+</html>
